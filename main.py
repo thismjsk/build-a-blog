@@ -15,16 +15,14 @@
 # limitations under the License.
 #
 import webapp2, jinja2, os
+from google.appengine.ext import db
 
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
-jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir), autoescape = True)
 
 class Index(webapp2.RequestHandler):
     def get(self):
-        t = jinja_env.get_template("frontpage.html")
-        content = t.render(
-        )
-        self.response.write(content)
+        self.redirect("/blog")
 
 class NewPost(webapp2.RequestHandler):
     def get(self):
@@ -38,23 +36,39 @@ class NewPost(webapp2.RequestHandler):
         post_body = self.request.get("post_body")
 
         if title and post_body:
-            self.response.write("Post Successful!")
+            post = Posts(title = title, post_body = post_body)
+            post.put()
+            self.redirect("/")
         else:
             error = "You are missing something from your post!"
             t = jinja_env.get_template("newpost.html")
-            content = t.render(error = error
-
+            content = t.render(
+            title = title,
+            post_body = post_body,
+            error = error
             )
             self.response.write(content)
+
+class Posts(db.Model):
+    title = db.StringProperty(required = True)
+    post_body = db.TextProperty(required = True)
+    created = db.DateTimeProperty(auto_now_add = True)
+
+class RecentPosts(webapp2.RequestHandler):
+    def get(self):
+        query = Posts.all().order("-created")
+        recent_posts = query.fetch(limit = 5)
+
+        t = jinja_env.get_template("frontpage.html")
+        content = t.render(posts = recent_posts
+        )
+        self.response.write(content)
+
+
 
 class ViewPostHandler(webapp2.RequestHandler):
     def get(self, id):
         self.response.write(id) #currently set up to just print the ID
-
-class RecentPosts(webapp2.RequestHandler):
-    def get(self):
-        pass
-
 
 
 
