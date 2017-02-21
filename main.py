@@ -14,18 +14,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-import webapp2
+import webapp2, jinja2, os
 
-#
+template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
 
 class MainHandler(webapp2.RequestHandler):
     def get(self):
-        self.response.write('Hello world!')
+        t = jinja_env.get_template("frontpage.html")
+        content = t.render(
+        )
+        self.response.write(content)
+
+class ViewPostHandler(webapp2.RequestHandler):
+    def get(self, id):
+        self.response.write(id) #currently set up to just print the ID
+
+class RecentPosts(webapp2.RequestHandler):
+    def get(self):
+        pass
+
+class NewPost(webapp2.RequestHandler):
+    def get(self):
+        pass
+
+
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler)
-    # ('/blog/<id:\d+>', ViewPostHandler)
+    ('/', MainHandler),
+    webapp2.Route('/blog/<id:\d+>', ViewPostHandler),
+    ('/blog', RecentPosts),
+    ('/newpost', NewPost)
 
 
-    )
 ], debug=True)
