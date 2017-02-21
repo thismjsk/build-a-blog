@@ -38,7 +38,10 @@ class NewPost(webapp2.RequestHandler):
         if title and post_body:
             post = Posts(title = title, post_body = post_body)
             post.put()
-            self.redirect("/")
+            # t = jinja_env.get_template("post.html")
+            # content = t.render(post = post)
+            perma = str(post.key().id())
+            self.redirect('/blog/' + perma )
         else:
             error = "You are missing something from your post!"
             t = jinja_env.get_template("newpost.html")
@@ -68,7 +71,13 @@ class RecentPosts(webapp2.RequestHandler):
 
 class ViewPostHandler(webapp2.RequestHandler):
     def get(self, id):
-        self.response.write(id) #currently set up to just print the ID
+        unique_post = Posts.get_by_id(int(id))
+        t = jinja_env.get_template("post.html")
+        content = t.render(post = unique_post,
+
+        )
+
+        self.response.write(content)
 
 
 
