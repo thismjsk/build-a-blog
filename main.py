@@ -19,12 +19,33 @@ import webapp2, jinja2, os
 template_dir = os.path.join(os.path.dirname(__file__), 'templates')
 jinja_env = jinja2.Environment(loader = jinja2.FileSystemLoader(template_dir))
 
-class MainHandler(webapp2.RequestHandler):
+class Index(webapp2.RequestHandler):
     def get(self):
         t = jinja_env.get_template("frontpage.html")
         content = t.render(
         )
         self.response.write(content)
+
+class NewPost(webapp2.RequestHandler):
+    def get(self):
+        t = jinja_env.get_template("newpost.html")
+        content = t.render(
+        )
+        self.response.write(content)
+
+    def post(self):
+        title = self.request.get("title")
+        post_body = self.request.get("post_body")
+
+        if title and post_body:
+            self.response.write("Post Successful!")
+        else:
+            error = "You are missing something from your post!"
+            t = jinja_env.get_template("newpost.html")
+            content = t.render(error = error
+
+            )
+            self.response.write(content)
 
 class ViewPostHandler(webapp2.RequestHandler):
     def get(self, id):
@@ -34,14 +55,11 @@ class RecentPosts(webapp2.RequestHandler):
     def get(self):
         pass
 
-class NewPost(webapp2.RequestHandler):
-    def get(self):
-        pass
 
 
 
 app = webapp2.WSGIApplication([
-    ('/', MainHandler),
+    ('/', Index),
     webapp2.Route('/blog/<id:\d+>', ViewPostHandler),
     ('/blog', RecentPosts),
     ('/newpost', NewPost)
